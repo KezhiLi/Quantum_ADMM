@@ -1,4 +1,12 @@
 function [ rho1,result_min,result_rho,result_resid, t_095,fide_095] = Robust_Quantum_fixedpoint_fast (b,A,maxite,tol_1 ,X_true,gamma,lamda,c,M,t,svd_sNo,shrink_para)
+% function that generates the reconstruction result
+% rho1: the reconstructed density matrix rho
+% result_rho: reconstructed accuracy
+% t_095: the time uses when the algorithm acheives 95% accuracy
+% fide_095: the time uses when the algorithm acheives 95% fidelity
+%
+% Copyrights to Dr. Kezhi Li, @Imperial College, 22nd Jan. 2017
+
 [A_row,A_col]  = size(A);
 d = round(sqrt(A_col)); %  the nearest integers
 
