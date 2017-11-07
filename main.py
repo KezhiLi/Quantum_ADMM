@@ -9,15 +9,15 @@ import numpy as np
 from numpy import linalg as LA
 import matplotlib.pyplot as plt
 import math, time, sklearn.decomposition
-import h5py 
+from scipy import sparse
 
 qubit = 8
 R = 1
-N=2^qubit;
-P=2^qubit;
+N=2**qubit;
+P=2**qubit;
 
 if R == 1:
-    svd_sNo = 200
+    svd_sNo = 150
     shrink_para = 1
 elif R == 2:
     shrink_para = 1 
@@ -90,11 +90,12 @@ def Robust_Quantum_fixedpoint_fast(b,A,maxite,tol_1 ,X_true,gamma,lamda,c,M,t,sv
     while ~converged:
         # display iteration
         ite=ite+1
+        print(ite)
         
         if ite%10==0:
             print("iterations:"+str(ite))
 
-        xi=(gamma*lamda/(1+gamma*lamda))*(-y/lamda-np.dot(A,(rho0-b)))      
+        xi=(gamma*lamda/(1+gamma*lamda))*(-y/lamda-(np.dot(A,rho0)-b))      
         A_rho0 = np.dot(A,rho0)
         rho1=rho0-t*np.dot(A.T,(A_rho0+xi-b+y/lamda))
         rho=project2Hermitian_singular_shrink_fast(rho1,alp,d,svd_sNo)
@@ -196,6 +197,7 @@ c=1.099
 nu=0
 tol_1=1e-6
 
+AA = np.reshape(A.toarray(),(A.shape[0],N,P))
 # generate X_true matrix, and the number of measurements M
 M,outlier,X_true=generate_rho_outlier(N,P,R,eta,nu)
 
@@ -207,7 +209,8 @@ M,outlier,X_true=generate_rho_outlier(N,P,R,eta,nu)
 sigma=1e-4*LA.norm(X_true,'fro')
 
 # generate the measurements after corrupted by noises
-b= np.dot(A,(np.reshape(X_true,(N*P,1)))) # +sigma*np.random.randn(M)
+#b= np.dot(A,(np.reshape(X_true,(N*P,1)))) # +sigma*np.random.randn(M)
+b = np.einsum('ijk,jk',AA,X_true)
 
 # maximum iteration no.
 maxite=100
