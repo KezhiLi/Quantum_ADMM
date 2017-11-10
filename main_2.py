@@ -77,7 +77,7 @@ def Robust_Quantum_fixedpoint_fast_sq(b,A,maxite,tol_1 ,X_true,gamma,lamda,c,M,t
     y=np.zeros(M)
     rho_sq=np.zeros((d,d))
     ite = 0
-    converged = 0
+    no_converged = True
     result_min=np.zeros(maxite)
     result_rho=np.zeros(maxite)
     result_resid=np.zeros(maxite)
@@ -87,7 +87,7 @@ def Robust_Quantum_fixedpoint_fast_sq(b,A,maxite,tol_1 ,X_true,gamma,lamda,c,M,t
     fide_095=-1
     tic = time.time()
 
-    while ~converged:
+    while no_converged:
         # display iteration
         ite=ite+1
         print(ite)
@@ -124,11 +124,11 @@ def Robust_Quantum_fixedpoint_fast_sq(b,A,maxite,tol_1 ,X_true,gamma,lamda,c,M,t
         stop=LA.norm(resid)
         
         if stop<tol_1:
-            converged=1
+            no_converged= False
 
-        if ~converged and ite>=maxite:
+        if no_converged and ite>=maxite:
             print('maximum iteration reached')
-            converged=1
+            no_converged= False
 
     return rho1_sq,result_min,result_rho,result_resid, t_095,fide_095
 
@@ -153,7 +153,7 @@ def project2Hermitian_singular_shrink_fast_sq(rho_sq,alp,d,svd_sNo):
 #    diagDD = list(map(max, zip(diagD-alp, np.zeros(len(diagD)))))
 #    diagD = diagDD + list(map(min, zip(diagDD+alp, np.zeros(len(diagDD)))))
     diagDD = np.fmax(D-alp, np.zeros(len(D)))
-    diagD = diagDD + np.fmax(diagDD+alp, np.zeros(len(diagDD)))
+    diagD = diagDD + np.fmin(diagDD+alp, np.zeros(len(diagDD)))
     
     rho=np.dot(np.dot(U,np.diag(diagD)),VT)
     
@@ -222,8 +222,8 @@ rho1_sq,result_min,result_rho,result_resid,t_095,fide_095 =Robust_Quantum_fixedp
      
 # draw results for the correspoding qubits        
 xx=np.array(range(maxite))
-plt.plot(xx,result_rho[0,:],'r--')
-plt.plot(xx,result_resid[0,:],'b^')
+plt.plot(xx,result_rho[:],'r--')
+plt.plot(xx,result_resid[:],'b^')
 plt.xlabel('iteration')
 plt.ylabel('error')
 plt.show()
